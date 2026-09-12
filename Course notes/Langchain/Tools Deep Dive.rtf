@@ -1,0 +1,570 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Bold;\f1\froman\fcharset0 Times-Roman;\f2\fmodern\fcharset0 Courier;
+\f3\fmodern\fcharset0 Courier-Bold;\f4\fnil\fcharset0 Menlo-Regular;\f5\froman\fcharset0 Times-Italic;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid1\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 1. Why tools exist\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 CineBot now has a brain that always answers in a fixed structure. It still has no hands.\
+Asked "Is Interstellar showing tonight at 7pm at the downtown cinema?", the model replied that it has no access to live listings and suggested Googling it. Wrap the same question in 
+\f2\fs26 with_structured_output
+\f1\fs24  and it fills the schema fields with nothing useful, or invents a showtime.\
+The model is limited to what it knows. Anything outside that \'97 live data, a database, an external API, an action in the world \'97 needs a tool.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Tools are just glorified API calls or functions. If you can't write a proper function, you won't write a good tool.\
+Anytime an agent needs to reach outside itself, it goes through a tool. MCP, covered later, is essentially a collection of tools.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 2. Defining a tool\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 from langchain_core.tools import tool\
+\
+@tool\
+def check_showtimes(movie_title: str) -> str:\
+    """Get the showtimes for a given movie."""\
+    return f"\{movie_title\} is showing at 4pm, 7pm and 10pm"\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Four parts to every tool:\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1233\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6971\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\f0\b \cf0 Part\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Where it comes from\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1233\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6971\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Name
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 The function name\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1233\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6971\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Description
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 The docstring \'97 this is what the model reads to decide whether to call it\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1233\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6971\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Arguments
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Function parameters, with type hints (required)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1233\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth6971\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b \cf0 Return type
+\f1\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 The annotation on the function\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 The docstring goes to the AI as the tool description. It should be long enough to fully convey what the tool does and no longer.\
+Use 
+\f2\fs26 snake_case
+\f1\fs24  for tool names.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Overriding name and description\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 @tool("book_seats", description="Book cinema seats for a customer. Use whenever a customer wants to book or reserve a seat.")\
+def reserve(movie: str, seats: int) -> str:\
+    """Reserve seats."""\
+    return f"Reserved \{seats\} seats for \{movie\}"\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Useful when you're wrapping someone else's function, when the existing name is taken, or when the original docstring is too thin for a model to work from.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 3. 
+\f3\fs39 args_schema
+\f0\fs36  \'97 Pydantic validation on tool inputs\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 from pydantic import BaseModel, Field\
+from typing import Literal\
+\
+class SeatBookingInput(BaseModel):\
+    movie_title: str = Field(description="Exact movie title")\
+    seat_count: int = Field(ge=1, le=10, description="Number of seats")\
+    preferred_row: Literal["front", "middle", "back"] = Field(default="middle")\
+\
+@tool("book_seats", args_schema=SeatBookingInput)\
+def book_seats(movie_title: str, seat_count: int, preferred_row: str) -> str:\
+    """Book seats for a movie."""\
+    ...\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Inspect what the model actually sees:\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 print(book_seats.args)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Without the 
+\f2\fs26 @tool
+\f1\fs24  decorator, a plain function has no 
+\f2\fs26 .args
+\f1\fs24  at all \'97 
+\f2\fs26 AttributeError
+\f1\fs24 . With the decorator you get names and types. With 
+\f2\fs26 args_schema
+\f1\fs24  on top, you get descriptions, defaults, and constraints too.\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Field names in the schema must match the function parameters exactly.
+\f1\b0  He had 
+\f2\fs26 seats
+\f1\fs24  in the function and 
+\f2\fs26 seat_count
+\f1\fs24  in the schema during the demo and flagged it as his own mistake \'97 there's no automatic mapping.\
+
+\f0\b JSON schema is weaker than Pydantic.
+\f1\b0  Declare 
+\f2\fs26 location
+\f1\fs24  as 
+\f2\fs26 "type": "string"
+\f1\fs24  in a raw JSON schema and pass an integer: no error. Python doesn't enforce type hints; Pydantic does. Prefer Pydantic.\
+On the token cost of richer schemas: don't optimise for fewer tokens at the expense of correctness. Thirty extra tokens that get the right answer on the first call beat two calls.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 4. Reserved parameter names\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f3\fs26 \cf0 config
+\f0\fs24  and 
+\f3\fs26 runtime
+\f0\fs24  cannot be used as tool argument names.
+\f1\b0  LangChain reserves both.\
+The failure mode is worth knowing: defining the tool succeeds silently. The error only appears when the tool is actually invoked \'97 a runtime error, not a definition-time one. The demo took a while to surface because the error was buried in the last message of the agent result.\
+Why runtime rather than a syntax error: the same function might be decorated for a different framework that doesn't reserve those names, so LangChain doesn't block the definition.\
+If you need a config parameter, rename it.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 5. Binding vs execution\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 model_with_tools = model.bind_tools([check_showtimes, book_seats])\
+response = model_with_tools.invoke("Is Interstellar showing tonight? Book two seats for Rohan")\
+\
+for tool_call in response.tool_calls:\
+    print(tool_call["name"], tool_call["args"])\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 The response has empty content and a populated 
+\f2\fs26 tool_calls
+\f1\fs24  list. Nothing executed.\
+Flow: 
+\f2\fs26 model + tools 
+\f4 \uc0\u8594 
+\f2  bind_tools 
+\f4 \uc0\u8594 
+\f2  model_with_tools 
+\f4 \uc0\u8594 
+\f2  invoke 
+\f4 \uc0\u8594 
+\f2  model decides it needs a tool 
+\f4 \uc0\u8594 
+\f2  tool call populated, request only 
+\f4 \uc0\u8594 
+\f2  create_agent is what actually runs it
+\f1\fs24 .\
+Repeated for the third session running, because people keep getting it wrong in interviews: 
+\f0\b the model never calls a tool.
+\f1\b0  ChatGPT and Claude are agentic applications, not models \'97 the confusion comes from there.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 6. Three sources of tools\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Your own functions
+\f1\b0  \'97 the normal case\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 LangChain pre-built tools and toolkits
+\f1\b0  \'97 Tavily search, and a long integrations list. These come with their own API keys and rate limits (Tavily gives 1,000 free calls). LangChain doesn't hand you free credentials.\
+\ls1\ilvl0
+\f0\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	3	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Server-side / provider tools
+\f1\b0  \'97 web search, code interpreter, built into the model itself\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 He opened the Tavily source on GitHub to make the point that pre-built tools aren't magic: a class with a name, a description, a well-defined 
+\f2\fs26 args_schema
+\f1\fs24 , an 
+\f2\fs26 __init__
+\f1\fs24  and a 
+\f2\fs26 _run
+\f1\fs24  method. Worth reading.\
+On provider tools: when Claude or ChatGPT searches the web, that runs on their servers. It's a capability inside the model, not the model executing your tool, and it never touches your machine.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 7. 
+\f3\fs39 ToolRuntime
+\f0\fs36  \'97 the big idea of the session\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 from langchain.tools import ToolRuntime\
+\
+@tool\
+def get_last_movie_mentioned(movie: str, runtime: ToolRuntime) -> str:\
+    """..."""\
+    ...\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Add a parameter typed 
+\f2\fs26 ToolRuntime
+\f1\fs24  and check 
+\f2\fs26 .args
+\f1\fs24 : 
+\f0\b the model doesn't see it.
+\f1\b0  Only 
+\f2\fs26 movie
+\f1\fs24  shows up in the schema.\
+The mirror analogy used in class: the model sees its own reflection \'97 the declared arguments. It cannot see what's behind the mirror. The tool can.\
+What 
+\f2\fs26 runtime
+\f1\fs24  gives access to:\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3432\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth7525\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\f0\b \cf0 Attribute\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 What it holds\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3432\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth7525\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 runtime.state
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Short-term memory \'97 messages, counters, custom fields for this conversation\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3432\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth7525\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 runtime.context
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Immutable config passed at invocation time (user tier, session settings)\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3432\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth7525\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 runtime.store
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Long-term memory that survives across conversations\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3432\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth7525\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 runtime.stream_writer
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Live progress updates during a long tool run\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3432\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth7525\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 runtime.execution_info
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 thread_id, run_id, attempt number \'97 for debugging\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth3432\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth7525\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 runtime.server_info
+\f1\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 LangGraph-server metadata; 
+\f2\fs26 None
+\f1\fs24  for local development\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 This is the line he drew between a function and a tool: a function that can read state, context, and stored preferences is doing something a plain function cannot.\
+Concrete motivations: paid users get more capable tools than free ones; a tool that knows the user's earlier messages performs better; the "searching for X\'85" progress text you see in Claude comes from a stream writer.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Demo: a loyalty store\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 from langgraph.store.memory import InMemoryStore\
+\
+loyalty_store = InMemoryStore()\
+\
+@tool\
+def save_favorite_genre(customer_id: str, genre: str, runtime: ToolRuntime) -> str:\
+    """Save a customer's favourite movie genre for future visits."""\
+    runtime.store.put((customer_id, "preferences"), "favorite_genre", \{"value": genre\})\
+    return f"Got it, I will remember you like \{genre\} movies"\
+\
+@tool\
+def recall_favorite_genre(customer_id: str, runtime: ToolRuntime) -> str:\
+    """Recall a customer's favourite movie genre if saved before."""\
+    result = runtime.store.get((customer_id, "preferences"), "favorite_genre")\
+    return result.value["value"] if result else "No saved preference for this customer"\
+\
+memory_agent = create_agent(\
+    model=model,\
+    tools=[save_favorite_genre, recall_favorite_genre],\
+    store=loyalty_store,   # tools reach it via runtime\
+)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Telling the agent "Hi, I'm Priya, I love sci-fi movies" triggered 
+\f2\fs26 save_favorite_genre
+\f1\fs24 . A later turn recalled it.\
+Notes on this:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0
+\f2\fs26 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 InMemoryStore
+\f1\fs24  lives in RAM. Restart and it's gone.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 For production, swap in 
+\f2\fs26 PostgresStore
+\f1\fs24  for persistence. The mechanism is identical.\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Memory, checkpointing, and short vs long-term memory get a proper session later. This demo exists to show what 
+\f2\fs26 runtime
+\f1\fs24  unlocks.\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The store attaches to the agent; tools reach it through 
+\f2\fs26 runtime
+\f1\fs24 , not by importing it.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Side principle he wrote on the board: 
+\f0\b simple systems \'97 keep the fewest moving parts.
+\f1\b0  He could have used Redis here. Fewer libraries and fewer external services is the better default.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f0\b\fs28 \cf0 Why 
+\f3\fs30\fsmilli15210 execution_info
+\f0\fs28  matters\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 LangChain is built on LangGraph, so every tool is a node in a graph. 
+\f2\fs26 execution_info
+\f1\fs24  exposes the run ID, thread ID, and attempt number for that node, which is what you need when debugging how many times something ran.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 8. 
+\f3\fs39 return_direct=True
+\f0\fs36 \
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Normal flow uses the LLM at least twice: once to decide which tool to call, once to summarise the tool output.\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 user 
+\f4 \uc0\u8594 
+\f2  agent 
+\f4 \uc0\u8594 
+\f2  model ("call this tool with these args") 
+\f4 \uc0\u8594 
+\f2  tool runs 
+\f4 \uc0\u8594 
+\f2  result 
+\f4 \uc0\u8594 
+\f2  model summarises 
+\f4 \uc0\u8594 
+\f2  answer\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 Sometimes you don't want that second pass.\
+The example: a refund policy tool that returns verbatim policy text. Run it through the model and it "helpfully" reformats into bullets, adds "contact customer support", and generally introduces claims that were never in the policy. Even a system message saying 
+\f5\i must be shown verbatim, never paraphrased
+\f1\i0  didn't hold.\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 @tool(return_direct=True)\
+def get_refund_policy() -> str:\
+    """Return the exact refund policy text."""\
+    return POLICY_TEXT\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\fs24 \cf0 With 
+\f2\fs26 return_direct=True
+\f1\fs24 , the tool's output goes straight back as the answer. Inspecting the messages shows the chain ending at the 
+\f2\fs26 ToolMessage
+\f1\fs24  \'97 no final AI turn. Fewer tokens as a side benefit.\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 The Air Canada case
+\f1\b0  was the cautionary tale: their chatbot told a bereaved passenger he could claim a discounted fare retroactively. The court held the airline liable. A policy written as "we go out of our way to be helpful to our customers\'85 but we do not offer refunds" is exactly the kind of text a model will soften.\
+Caveat: nothing runs after a 
+\f2\fs26 return_direct
+\f1\fs24  tool. If you need further steps, or you want the model to sanity-check the output, this isn't the right tool for it. You can't have both verbatim output and model verification.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 9. Dynamic tool loading (problem stated, solution next class)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b0\fs24 \cf0 Three distinct problems, all solved with middleware in the next session:\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b \cf0 Context bloat.
+\f1\b0  Fifty tools at roughly 500 tokens each is 25k tokens before the user says anything. Beyond cost, the model gets confused choosing between them.\
+
+\f0\b Authorisation.
+\f1\b0  With 
+\f2\fs26 standard_booking
+\f1\fs24  and 
+\f2\fs26 vip_lounge_booking
+\f1\fs24  both bound, a normal user asking "book me a VIP lounge seat" got the VIP tool called. The model decided, and the model can be wrong. The tool should never have been loaded for that user in the first place. This is a guardrail problem, not a prompting problem.\
+
+\f0\b Runtime discovery.
+\f1\b0  If you point an agent at an MCP server mid-conversation, it starts with zero tools and has to load them during the run.\
+Live evidence from Claude: a bare "hi" costs about 4k tokens, then climbs to 27\'9635k as connectors load. 
+\f0\b Haiku loads all tools up front; Sonnet and Opus load them on demand
+\f1\b0  \'97 one more reason to use a stronger model.\
+Dynamic loading is not the default. It requires middleware (
+\f2\fs26 wrap_model_call
+\f1\fs24 , 
+\f2\fs26 wrap_tool_call
+\f1\fs24 ), which is the next topic.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 10. Q&A worth keeping\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 Agent vs bind_tools.
+\f1\b0  Binding tells the model the tool exists. The agent can actually call it. The agent also invokes the model internally \'97 you pass the model in at creation and never call it yourself.\
+
+\f0\b Multiple stores.
+\f1\b0  Possible, but generally avoid it. Don't scatter state across storage solutions.\
+
+\f0\b Store size limits.
+\f1\b0  Not a LangChain question. How much data a store holds and how it scales is a database question.\
+
+\f0\b Other frameworks.
+\f1\b0  Google ADK, OpenAI Agents SDK, Claude Agent SDK, AutoGen, CrewAI, Pydantic AI. All do the same things: agents, tools, messages, memory. They can talk to each other via plain APIs or A2A (agent-to-agent), covered later.\
+
+\f0\b Reserved names inside a schema.
+\f1\b0  Whether 
+\f2\fs26 config
+\f1\fs24 /
+\f2\fs26 runtime
+\f1\fs24  are legal as fields inside an 
+\f2\fs26 args_schema
+\f1\fs24  rather than direct parameters \'97 untested, he said he'd check.\
+
+\f0\b Guardrails.
+\f1\b0  An umbrella term for anything that makes an agent more deterministic or less prone to hallucination. Everything in this session converges on it. Sophisticated tooling exists, but getting these fundamentals right from the start matters more.\
+
+\f0\b Using AI to write this code faster.
+\f1\b0  Claude Code writes at the level you can specify. Knowing that 
+\f2\fs26 ToolStrategy
+\f1\fs24 , 
+\f2\fs26 args_schema
+\f1\fs24 , 
+\f2\fs26 return_direct
+\f1\fs24 , and dynamic loading exist is what lets you ask for them. That first push is the difference between generated code and good generated code.\
+
+\f0\b Evaluation and monitoring.
+\f1\b0  LangSmith and other frameworks, covered later. For validating against internal data, use a dev/UAT database during development the way you would for any application.\
+
+\f0\b Documentation.
+\f1\b0  Repeated as the single skill worth having. Everything ChatGPT tells you is downstream of the docs anyway.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f0\b\fs36 \cf0 \strokec2 Revision checklist\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls3\ilvl0
+\f1\b0\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Write a tool with 
+\f2\fs26 @tool
+\f1\fs24 , name it, describe it, type it\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Explain what the docstring is for\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Attach an 
+\f2\fs26 args_schema
+\f1\fs24  and show what 
+\f2\fs26 .args
+\f1\fs24  gains\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Name the two reserved parameter names and when the error appears\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Explain why 
+\f2\fs26 bind_tools
+\f1\fs24  alone can never complete a task\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] List everything 
+\f2\fs26 ToolRuntime
+\f1\fs24  exposes\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Read and write to a store from inside a tool\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Say when 
+\f2\fs26 return_direct=True
+\f1\fs24  is right and when it isn't\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] State the three reasons you wouldn't load all tools up front\
+}

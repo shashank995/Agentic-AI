@@ -1,0 +1,529 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\froman\fcharset0 Times-Bold;\f2\fmodern\fcharset0 Courier;
+\f3\froman\fcharset0 TimesNewRomanPSMT;\f4\fmodern\fcharset0 Courier-Bold;\f5\froman\fcharset0 Times-Italic;
+}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Three files were shared before this class: a student reference notebook, an assignment (questions plus coding exercises), and a set of interview questions sourced from people's actual interviews. Note on the interview set: many questions target older LangChain versions, because companies are still running them \'97 the course stays on 1.0 regardless.\
+Middleware gets a full session next Saturday, then memory, RAG, and MCP.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 1. Recap threads worth keeping\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls1\ilvl0
+\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Structured output.
+\f0\b0  Every topic gets discussed twice: once at the model level (
+\f2\fs26 with_structured_output
+\f0\fs24 ) and once at the agent level (
+\f2\fs26 response_format
+\f0\fs24 ). Both bottom out in the model. 
+\f2\fs26 ToolStrategy
+\f0\fs24  is a LangChain feature, not a model feature \'97 the tool it uses internally sits on the LangChain side, because a model can never call a tool.\
+\ls1\ilvl0
+\f1\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The 15-tickets debate, settled.
+\f0\b0  Whether an over-limit request should be split into 10 + 5 is a product decision, not a developer one. If someone asks for 900 you won't book ninety batches of ten. The developer's job is that the ceiling holds without fail.\
+\ls1\ilvl0
+\f1\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Don't prompt your way out of a code problem.
+\f0\b0  The instinct to add "please don't make mistakes, you're a very smart model" to the system prompt is the wrong reflex. Enforce it in code where you can.\
+\ls1\ilvl0
+\f1\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Pre-built tools are just functions.
+\f0\b0  
+\f2\fs26 langchain-tavily
+\f0\fs24  gives you a function you didn't have to write. Nothing more.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 2. Dynamic tool gating\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 Picking up the problem left open last session.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 A menu that reprints itself before you sit down. A VIP member sees the full menu, a regular guest sees a shorter one \'97 not because they're asked not to order the VIP items, but because those items aren't printed at all.\
+With 
+\f2\fs26 standard_booking
+\f0\fs24  and 
+\f2\fs26 vip_lounge_booking
+\f0\fs24  both bound, a regular user asking for a VIP seat gets one. Two bad workarounds: asking the user whether they're a VIP (everyone says yes), or removing the tool entirely (then real VIPs can't use it).\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 With dynamic tools, the set of tools available to the agent is modified at runtime rather than defined all up front.\
+Two approaches: 
+\f1\b filter pre-registered tools
+\f0\b0  when everything is known at creation time, or load tools during the run (MCP discovery). Filtering is what this session covers.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f1\b\fs28 \cf0 Middleware, in brief\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 Middleware lets you cut into the loop at defined points: 
+\f2\fs26 before_agent
+\f0\fs24 , 
+\f2\fs26 before_model
+\f0\fs24 , 
+\f2\fs26 wrap_model_call
+\f0\fs24 , 
+\f2\fs26 wrap_tool_call
+\f0\fs24 , 
+\f2\fs26 after_model
+\f0\fs24 , 
+\f2\fs26 after_agent
+\f0\fs24 . Before calling a tool you can authenticate; after it you can log or scrub. One student compared it to advice in Spring AI, which fits.\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 @wrap_model_call\
+def gate_vip_tools(request, handler):\
+    is_vip = request.state.get("is_vip_member", False)\
+    if not is_vip:\
+        allowed = [t for t in request.tools if t.name != "vip_lounge_booking"]\
+        request = request.override(tools=allowed)\
+    return handler(request)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 Middleware acts as a filter between the agent and its tools. VIP false 
+\f3 \uc0\u8594 
+\f0  one tool passes. VIP true 
+\f3 \uc0\u8594 
+\f0  both pass.\
+The documented variants shown: state-based tool filtering (authenticated users get sensitive tools, unauthenticated get only 
+\f2\fs26 public_*
+\f0\fs24  tools; also gating advanced tools until message count exceeds a threshold) and store-based filtering off feature flags keyed by user ID.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f1\b\fs28 \cf0 The bug that took a break to fix\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 The first live attempt failed: passing 
+\f2\fs26 is_vip_member=True
+\f0\fs24  had no effect and the model kept saying it had no VIP tools. Cause: 
+\f1\b the agent didn't know that field existed.
+\f0\b0 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 class TripState(AgentState):\
+    is_vip_member: bool = False\
+\
+agent = create_agent(..., state_schema=TripState)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 You have to declare the schema. Only then does the value land in state where middleware and tools can read it. Same idea as ChatGPT tracking 
+\f2\fs26 is_pro_user
+\f0\fs24 .\
+Why not a plain Python 
+\f2\fs26 if/else
+\f0\fs24  outside the agent? Your Python code can't read the agent's state or store, and it can't react as the message count grows. It sees message count 0 forever.\
+Real-world framing: Prime members getting faster refunds from a support agent is this pattern.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 3. Headless tools\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 Some tools cannot run on your server. Clipboard access, geolocation, latency checks, payments \'97 these run where the user's app runs, usually the browser.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Headless tools are tool definitions \'97 name, description, argument schema \'97 that you register on the server with your agent. The implementation is registered only on the client and executed after a short interrupt-and-resume handshake.\
+Three tiers to keep straight:\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2614\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2782\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3145\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\f1\b \cf0 Tier\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Runs where\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 Example\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2614\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2782\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3145\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f0\b0 \cf0 Server-side / provider tools\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 The model provider's servers\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Claude's web search\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2614\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2782\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3145\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Your tools\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Your infrastructure\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Weather API call, DB query\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth2614\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2880
+\clvertalc \clshdrawnil \clwWidth2782\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx5760
+\clvertalc \clshdrawnil \clwWidth3145\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Headless tools\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 The user's browser or app\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Clipboard, geolocation, payment\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Amazon's servers are in the US; getting your location has to happen in your browser and be sent back.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 4. Agents\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 The agentic loop\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 An agent is a 
+\f2\fs26 while
+\f0\fs24  loop: receive message 
+\f3 \uc0\u8594 
+\f0  request tool call 
+\f3 \uc0\u8594 
+\f0  execute tool 
+\f3 \uc0\u8594 
+\f0  append result 
+\f3 \uc0\u8594 
+\f0  repeat until done. The model reports a stop reason when it's finished or wants to ask something.\
+He prefers 
+\f1\b "agentic loop"
+\f0\b0  to "ReAct pattern" as terminology now.\
+Guard against infinite loops with a max-turns condition, as in the earlier plain-Python build.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f1\b\fs28 \cf0 Agent = model + harness\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 A reflection worth recording: in the last four or five years, the only genuinely new thing is the artificial brain. Everything around it \'97 tools, messages, memory, orchestration \'97 is ordinary software engineering. The work is harnessing the model well.\
+By now the components have all been covered: models, messages, tools, structured output. Still to come: memory, sub-agents, skills, middleware.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 5. TripMate \'97 the mini-project\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 A shift away from mocked tools. Four real ones:\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b \cf0 1. Real weather
+\f0\b0  \'97 Open-Meteo, free and open source, no key.\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 @tool\
+def get_real_weather(city: str) -> str:\
+    """Get the current weather for a city."""\
+    geo = requests.get("https://geocoding-api.open-meteo.com/v1/search", params=\{"name": city\}).json()\
+    ...\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 Verified against Tokyo, New Delhi and Bengaluru with plausible readings.\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b \cf0 2. Tavily search
+\f0\b0  \'97 third-party service; LangChain provides the integration, the key and quota are yours.\
+
+\f1\b 3 & 4. 
+\f4\fs26 save_trip
+\f1\fs24  / 
+\f4\fs26 get_saved_trips
+\f0\b0\fs24  \'97 backed by SQLite:\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 def setup_database():\
+    conn = sqlite3.connect("tripmate.db")\
+    conn.execute("CREATE TABLE IF NOT EXISTS trips (...)")\
+    conn.commit()\
+    conn.close()\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 On the repeated "why SQLite and not Chroma/Postgres/Mongo?" question: it doesn't matter. It's a database. SQLite is the easiest thing to mock up locally. Whichever one you name, someone will ask why not the other.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 6. Three storage layers (the part people conflated)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 The agent ends up with three distinct stores, and telling them apart matters.\
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1146\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth5251\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4874\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth1592\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\f1\b \cf0 \cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\f4\fs26 \cf0 InMemorySaver
+\f1\fs24  (checkpointer)\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+
+\f4\fs26 \cf0 InMemoryStore
+\f1\fs24  (store)\cell 
+\pard\intbl\itap1\pardeftab720\qc\partightenfactor0
+\cf0 SQLite DB\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1146\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth5251\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4874\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth1592\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Holds
+\f0\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Full graph state after each step \'97 conversation history\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Arbitrary key-value data\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Application data\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1146\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth5251\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4874\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth1592\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\b \cf0 Used for
+\f0\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Resuming a conversation\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 User preferences, long-term memory\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Saved trips\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1146\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth5251\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4874\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth1592\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\b \cf0 Access
+\f0\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Automatic\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 put
+\f0\fs24  / 
+\f2\fs26 get
+\f0\fs24  / 
+\f2\fs26 search
+\f0\fs24  / 
+\f2\fs26 delete
+\f0\fs24  via 
+\f2\fs26 runtime
+\f0\fs24 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Your SQL\cell \row
+
+\itap1\trowd \taflags0 \trgaph108\trleft-108 \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalc \clshdrawnil \clwWidth1146\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx2160
+\clvertalc \clshdrawnil \clwWidth5251\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx4320
+\clvertalc \clshdrawnil \clwWidth4874\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx6480
+\clvertalc \clshdrawnil \clwWidth1592\clftsWidth3 \clmart10 \clmarl10 \clmarb10 \clmarr10 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt20 \clpadl20 \clpadb20 \clpadr20 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+
+\f1\b \cf0 Persistence
+\f0\b0 \cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Only while the Python process runs\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 Only while the Python process runs\cell 
+\pard\intbl\itap1\pardeftab720\partightenfactor0
+\cf0 On disk\cell \lastrow\row
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Both LangGraph classes swap for persistent versions (
+\f2\fs26 PostgresSaver
+\f0\fs24 , 
+\f2\fs26 PostgresStore
+\f0\fs24 ) in production.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f1\b\fs28 \cf0 Checkpointing and thread IDs\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 The problem, demonstrated: tell CineBot "my name is Mayank", then ask "who am I?" \'97 it has no idea.\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 from langgraph.checkpoint.memory import InMemorySaver\
+\
+checkpointer = InMemorySaver()\
+agent = create_agent(model=..., tools=[...], checkpointer=checkpointer)\
+\
+config = \{"configurable": \{"thread_id": "mayank-session-1"\}\}\
+agent.invoke(\{"messages": [...]\}, config)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 Adding a checkpointer makes 
+\f2\fs26 config
+\f0\fs24  mandatory \'97 the saver needs to know which thread it's saving under. Change the 
+\f2\fs26 thread_id
+\f0\fs24  and the agent no longer knows you; the history belongs to the other thread.\
+In production the thread ID is a UUID generated per session, never a hand-written string. One session, one thread; a user can have many.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 7. Context schema\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 For pre-run configuration \'97 user ID, API keys, feature flags \'97 pass it as 
+\f2\fs26 context
+\f0\fs24  alongside 
+\f2\fs26 config
+\f0\fs24 :\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs26 \cf0 from dataclasses import dataclass\
+\
+@dataclass\
+class TravelerContext:\
+    user_id: str\
+    home_currency: str\
+    membership_tier: str\
+\
+agent = create_agent(..., context_schema=TravelerContext)\
+\
+agent.invoke(\
+    \{"messages": [...], "is_premium_member": False\},\
+    config=config,\
+    context=TravelerContext(user_id="rohan01", home_currency="INR", membership_tier="standard"),\
+)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 Same lesson as the state schema: the agent has to be told what shape the extra data takes before middleware and tools can use it. You can't just throw arbitrary keys at it.\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f1\b\fs28 \cf0 The assembled agent\
+\pard\pardeftab720\partightenfactor0
+
+\f2\b0\fs26 \cf0 full_tripmate = create_agent(\
+    model=model,\
+    tools=[get_real_weather, tavily_search, save_trip, get_saved_trips, book_premium_concierge],\
+    system_prompt="...",\
+    middleware=[gate_premium_tools],\
+    checkpointer=checkpointer,       # conversation history\
+    store=travel_store,              # preferences\
+    context_schema=TravelerContext,  # pre-run config\
+    state_schema=TripState,\
+    response_format=ToolStrategy(Union[NewTripRequest, ModifyTripRequest, CancelTripRequest]),\
+    name="tripmate",\
+)\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 Every argument maps to a topic covered over the last three sessions.\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b \cf0 The live run didn't finish.
+\f0\b0  It looped, kept re-calling the model, and started burning credit before he stopped it. His diagnosis: something in the retry path, possibly the dataclass-vs-Pydantic warning on the context schema. Left as homework, to be fixed and explained next class \'97 with LangSmith named as the tool for finding where a run goes wrong.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 8. Q&A worth keeping\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\fs24 \cf0 When to use what \'97 store vs checkpointer vs cache vs database.
+\f0\b0  No universal answer; it depends on the application.\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls2\ilvl0
+\f5\i \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Chat history
+\f0\i0 : keep in memory if the session is disposable (Swiggy/Amazon support chats that expire), persist if you need it across days like ChatGPT. Storage on a fast-retrieval DB is expensive at scale.\
+\ls2\ilvl0
+\f5\i \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Store
+\f0\i0 : things needed across sessions \'97 "I prefer Python examples" \'97 i.e. long-term memory.\
+\ls2\ilvl0
+\f5\i \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Database
+\f0\i0 : the source of truth for the whole application. Predates AI, unchanged by it. Users can edit their stored preferences; they can't rewrite your logs.\
+\ls2\ilvl0
+\f5\i \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Caching
+\f0\i0 : a million identical "weather in Delhi" requests don't each need an API call. Cache the response for an hour or a day.\
+\ls2\ilvl0
+\f5\i \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Prompt caching
+\f0\i0 : a different thing entirely \'97 the provider caches the earlier turns so you send only the new message. Claude caches for roughly an hour.\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f1\b \cf0 Tool failures.
+\f0\b0  Retries depend on the failure type and the harness you build. Fatal errors surface as errors, the same way ChatGPT fails when your connection drops.\
+
+\f1\b Runtime tool discovery.
+\f0\b0  Yes, via MCP \'97 again through middleware.\
+
+\f1\b Performance for a single user.
+\f0\b0  Not a scaling question. Find where the time actually goes: LangSmith for the agent layer, logs for everything else. No single tool answers it.\
+
+\f1\b Interview technique.
+\f0\b0  When asked "what's the best X?", ask follow-ups back \'97 what are you optimising for, under what constraints. There's rarely one right answer, and saying so with the right questions is the answer.\
+
+\f1\b An earlier version of this course
+\f0\b0  covered the older LangChain. Stick with 1.0; the previous version will eventually be decommissioned.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 Revision checklist\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\partightenfactor0
+\ls3\ilvl0
+\f0\b0\fs24 \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Explain why gating tools beats asking the user or removing the tool\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Write a 
+\f2\fs26 wrap_model_call
+\f0\fs24  middleware that filters the tool list off state\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Say why a state schema (or context schema) is required before extra fields work\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Name the three tiers of where a tool executes, with an example of each\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Describe the agentic loop and how it terminates\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Distinguish 
+\f2\fs26 InMemorySaver
+\f0\fs24 , 
+\f2\fs26 InMemoryStore
+\f0\fs24 , and an application database\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Explain what 
+\f2\fs26 thread_id
+\f0\fs24  does and why a checkpointer makes 
+\f2\fs26 config
+\f0\fs24  mandatory\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 [ ] Assemble a 
+\f2\fs26 create_agent
+\f0\fs24  call with all nine arguments and say what each is for\
+}
